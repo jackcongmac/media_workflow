@@ -49,8 +49,8 @@
 在另一台电脑上：
 
 ```bash
-git clone <repo-url>
-cd <repo-folder>
+git clone https://github.com/jackcongmac/media_workflow.git
+cd media_workflow
 ```
 
 然后先读：
