@@ -12,9 +12,24 @@
 import argparse, base64, hashlib, hmac, json, os, re, sys, time, urllib.request, urllib.error
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-EP = os.path.join(ROOT, "shorts/yejiban_anomaly_archive/NX-071_undelivered_letter")
-IMG_DIR = os.path.join(ROOT, "shorts/yejiban_anomaly_archive/03_images")
-VID_DIR = os.path.join(ROOT, "shorts/yejiban_anomaly_archive/05_video_projects")
+ARCHIVE = os.path.join(ROOT, "shorts/yejiban_anomaly_archive")
+DEFAULT_EP = "NX-071_undelivered_letter"
+# 默认值（NX-071 历史产物在扁平目录）；__main__ 里按 --ep 用 set_episode() 覆盖。
+EP = os.path.join(ARCHIVE, DEFAULT_EP)
+IMG_DIR = os.path.join(ARCHIVE, "03_images")
+VID_DIR = os.path.join(ARCHIVE, "05_video_projects")
+
+def set_episode(ep):
+    """按集设置目录。输出目录按集命名空间隔离 05_video_projects/<ep>/，
+    避免不同集的 V01.mp4 互相覆盖/误跳过。NX-071 历史产物在扁平目录，
+    其命名空间目录不存在时回退扁平目录以保持向后兼容。"""
+    global EP, IMG_DIR, VID_DIR
+    EP = os.path.join(ARCHIVE, ep)
+    ns_img = os.path.join(ARCHIVE, "03_images", ep)
+    ns_vid = os.path.join(ARCHIVE, "05_video_projects", ep)
+    use_flat = (ep == DEFAULT_EP and not os.path.isdir(ns_vid))
+    IMG_DIR = os.path.join(ARCHIVE, "03_images") if use_flat else ns_img
+    VID_DIR = os.path.join(ARCHIVE, "05_video_projects") if use_flat else ns_vid
 
 STYLE = "竖屏9:16，夜间监控画风，低照度，写实，电影感冷调，画面内无任何文字水印logo，监控/夜视/噪点质感"
 NEG_IMG = "多余手指、畸形手、畸形脸、五官扭曲、现代品牌logo、画面文字、字幕、水印、卡通、3D渲染感、过曝、血腥、可辨认真实地标"
@@ -196,7 +211,10 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["images", "videos", "t2v", "probe"])
     ap.add_argument("--only")
+    ap.add_argument("--ep", default=DEFAULT_EP,
+                    help="集目录名（shorts/yejiban_anomaly_archive/ 下），默认 NX-071")
     a = ap.parse_args()
+    set_episode(a.ep)
     if a.cmd == "images": gen_images(a.only)
     elif a.cmd == "videos": gen_videos(a.only)
     elif a.cmd == "t2v": gen_t2v(a.only)

@@ -1,13 +1,25 @@
 #!/bin/zsh
-# NX-071 无声粗剪：把 05_video_projects/V01..V12.mp4 按 storyboard 顺序与时长
-# 拼成 1080x1920、加轻度监控暗绿质感的一条无声底片。
-# 配音/字幕/精修留给剪映（见 texture_notes.md）。
-# 用法: zsh tools/assemble_roughcut.sh
+# 无声粗剪：把某集的 V01..V12.mp4 按 storyboard 顺序与时长拼成 1080x1920、
+# 加轻度监控暗绿质感的一条无声底片。配音/字幕/精修留给剪映（见 texture_notes.md）。
+# 用法: zsh tools/assemble_roughcut.sh [集目录名]
+#   不带参数 = NX-071（向后兼容，读扁平 05_video_projects/）。
+#   带参数   = 该集，读按集隔离的 05_video_projects/<集目录名>/。
 set -u
 ROOT="${0:A:h:h}"
-EP="$ROOT/shorts/yejiban_anomaly_archive/NX-071_undelivered_letter"
-VID="$ROOT/shorts/yejiban_anomaly_archive/05_video_projects"
+ARCHIVE="$ROOT/shorts/yejiban_anomaly_archive"
+DEFAULT_EP="NX-071_undelivered_letter"
+EP_NAME="${1:-$DEFAULT_EP}"
+EP="$ARCHIVE/$EP_NAME"
+NS_VID="$ARCHIVE/05_video_projects/$EP_NAME"
+# 命名空间隔离的片源目录；仅默认集(NX-071)在其命名空间目录不存在时回退扁平目录。
+if [[ "$EP_NAME" == "$DEFAULT_EP" && ! -d "$NS_VID" ]]; then
+  VID="$ARCHIVE/05_video_projects"
+else
+  VID="$NS_VID"
+fi
 OUT="$EP/final_roughcut_silent.mp4"
+if [[ ! -d "$EP" ]]; then echo "FAIL: 集目录不存在: $EP"; exit 1; fi
+mkdir -p "$VID"
 WORK="$(mktemp -d "$VID/.roughcut.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 
