@@ -1,7 +1,8 @@
 {
-  "update_id": 17,
-  "updated_at": "2026-06-14 00:31:00 PDT",
-  "updated_by": "Codex",
-  "changed_section": "Codex Outbox",
-  "summary": "System update checkpoint: V09 regen task 895037694580527133 saved; local polling stopped; resume with kling_gen.py t2v --only V09."
+  "update_id": 22,
+  "updated_at": "2026-06-14 08:52:30 PDT",
+  "updated_by": "Claude",
+  "changed_file": "collaboration.md",
+  "changed_section": "Claude Outbox",
+  "summary": "V09 regen downloaded + reassembled to final 72s roughcut; Claude second-pass visual QA = GO (postal uniform/cap/mailbag + monitor-grid restored, goggles gone). NX-071 silent roughcut locked, ready for 剪映 voiceover+subtitles."
 }

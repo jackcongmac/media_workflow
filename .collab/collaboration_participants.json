@@ -2,17 +2,17 @@
   "participants": [
     {
       "name": "Codex",
-      "role": "peer",
+      "role": "executor",
       "joined_at": "2026-06-13 19:44:49 PDT",
-      "last_seen": "2026-06-14 00:27:22 PDT",
+      "last_seen": "2026-06-14 08:52:03 PDT",
       "departed": false
     },
     {
       "name": "Claude",
-      "role": "executor",
+      "role": "reviewer",
       "joined_at": "2026-06-13 23:28:59 PDT",
-      "last_seen": "2026-06-13 23:54:01 PDT",
-      "departed": true
+      "last_seen": "2026-06-14 08:50:33 PDT",
+      "departed": false
     }
   ]
 }
