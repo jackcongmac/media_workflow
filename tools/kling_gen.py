@@ -156,6 +156,34 @@ def gen_videos(only=None):
         print(f"[{v}] {'OK -> ' + dest if ok else 'FAIL ' + msg}")
         if not ok: return
 
+def gen_t2v(only=None):
+    """文生视频：不需首帧图，只吃视频额度。prompt = FF场景 + V运动 + 风格。"""
+    os.makedirs(VID_DIR, exist_ok=True)
+    ff_prompts = parse_prompts(os.path.join(EP, "image_prompts.md"), "FF")
+    v_prompts = parse_prompts(os.path.join(EP, "video_prompts.md"), "V")
+    state_path = os.path.join(VID_DIR, ".kling_state_t2v.json")
+    state = json.load(open(state_path)) if os.path.exists(state_path) else {}
+    for shot in parse_storyboard():
+        v, ff, dur = shot["v"], shot["ff"], shot["dur"]
+        if only and v != only: continue
+        dest = os.path.join(VID_DIR, v + ".mp4")
+        if os.path.exists(dest): print(f"[skip] {v} 已存在"); continue
+        tid = (state.get(v) or {}).get("task_id")
+        if not tid:
+            scene = ff_prompts.get(ff, ""); motion = v_prompts.get(v, "")
+            prompt = (scene + "。镜头运动：" + motion + " " + STYLE)[:2400]
+            body = {"model_name": VID_MODEL, "prompt": prompt, "negative_prompt": NEG_VID,
+                    "mode": VID_MODE, "duration": dur, "aspect_ratio": "9:16", "cfg_scale": 0.5}
+            st, resp = api("POST", "/v1/videos/text2video", body)
+            print(f"[{v}] create -> http {st} {json.dumps(resp, ensure_ascii=False)[:200]}")
+            if (resp or {}).get("code") != 0:
+                print(f"[{v}] 创建失败，停。"); return
+            tid = resp["data"]["task_id"]; state[v] = {"task_id": tid}
+            json.dump(state, open(state_path, "w"), ensure_ascii=False, indent=2)
+        ok, msg = poll("/v1/videos/text2video", tid, "vid", dest, timeout=900)
+        print(f"[{v}] {'OK -> ' + dest if ok else 'FAIL ' + msg}")
+        if not ok: return
+
 def probe():
     prompts = parse_prompts(os.path.join(EP, "image_prompts.md"), "FF")
     body = {"model_name": IMG_MODEL, "prompt": (prompts.get("FF01", "") + " " + STYLE)[:2400],
@@ -166,9 +194,10 @@ def probe():
 if __name__ == "__main__":
     if not AK or not SK: sys.exit(".env 缺 KLING_ACCESS_KEY/KLING_SECRET_KEY")
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["images", "videos", "probe"])
+    ap.add_argument("cmd", choices=["images", "videos", "t2v", "probe"])
     ap.add_argument("--only")
     a = ap.parse_args()
     if a.cmd == "images": gen_images(a.only)
     elif a.cmd == "videos": gen_videos(a.only)
+    elif a.cmd == "t2v": gen_t2v(a.only)
     else: probe()
