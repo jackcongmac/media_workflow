@@ -1,0 +1,18 @@
+{
+  "pings": {
+    "19ec4dad5c2-184b2": {
+      "from": "Claude",
+      "to": "Codex",
+      "nonce": "19ec4dad5c2-184b2",
+      "created_at": "2026-06-13 23:38:56 PDT",
+      "expires_at_epoch": 1781419152.450337
+    }
+  },
+  "pongs": {
+    "19ec4dad5c2-184b2": {
+      "from": "Codex",
+      "nonce": "19ec4dad5c2-184b2",
+      "pong_at": "2026-06-13 23:39:00 PDT"
+    }
+  }
+}
